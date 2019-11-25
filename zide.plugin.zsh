@@ -11,4 +11,6 @@ then
     fpath+=( "${0:h}" )
 fi
 
+typeset -g ZIDE_DIR=${0:h}
+
 autoload -Uz zide
