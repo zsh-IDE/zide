@@ -26,7 +26,7 @@ fi
 
 # Is it absolute path in %the-path format?
 if [[ "$1" = "%"* ]]; then
-    reply=( "%" "${1/\%HOME/$HOME}" )
+    reply=( "%" "${${1/\%HOME/$HOME}#%}" )
     reply[2]=${~reply[2]}
     return 0
 fi
