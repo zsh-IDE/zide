@@ -60,4 +60,15 @@ integer i l m
 # Filter out option-strings
 ide_mods=( ${ide_mods/(#m)*/${ide_mods[ ++i % 2 ? 0 : i ]}} )
 
+# Verify that the mods are correct
+local mod
+for mod ( $ide_mods ) {
+    [[ -z ${Mods[(ie)$mod]} ]] && \
+        { print -P "%F{160}Incorrect module given: " \
+            "%F{141}\`%F{120}$mod%F{141}'%F{160}," \
+            "aborting.%f"
+            return 1
+        }
+}
+
 # vim:ft=zsh:sw=4:sts=4:et
