@@ -55,12 +55,31 @@ case $action in
             -with:=ide_mods -use:=ide_mods
         name=$2
         ;;
+
+    (addfile)
+        # -D - clear out the recognized options
+        # -E - allow mixing of options and non-options
+        # -K - allow default values
+        # -M - allow private arrays for the options
+        #
+        # The options are:
+        # --with/--mod/-m/--use – to pass the desired module(s)
+        shift=( -s 4 )
+        license=( -l MIT )
+        zparseopts -D -E -K -M s:=shift -shift:=shift \
+            n=noet -noet=noet l:=license -license:=license
+
+        name=$2
+        ;;
 esac
 
 integer i l m
 
 # Filter out option-strings
-ide_mods=( ${ide_mods/(#m)*/${ide_mods[ ++i % 2 ? 0 : i ]}} )
+i=0; ide_mods=( ${ide_mods/(#m)*/${ide_mods[ ++i % 2 ? 0 : i ]}} )
+i=0; shift=( ${shift/(#m)*/${shift[ ++i % 2 ? 0 : i ]}} )
+i=0; noet=( ${noet/(#m)*/${noet[ ++i % 2 ? 0 : i ]}} )
+i=0; license=( ${license/(#m)*/${license[ ++i % 2 ? 0 : i ]}} )
 
 # Verify that the mods are correct
 local mod
@@ -71,6 +90,17 @@ for mod ( $ide_mods ) {
             "aborting.%f"
             return 1
         }
+}
+
+if [[ $action = addfile ]] {
+    cat >! "$name" <<EOF
+# -*- mode: sh; sh-indentation: $shift; ${noet:-indent-tabs-mode: nil; }sh-basic-offset: $shift; -*-
+
+# Copyright ${$(date "+%Y" 2>/dev/null):-2019} ${$(git config user.name 2>/dev/null):-Your Name}
+# License: ${license}
+
+# vim:ft=zsh:sw=${shift}:sts=${shift}${noet:-:et}
+EOF
 }
 
 # vim:ft=zsh:sw=4:sts=4:et
