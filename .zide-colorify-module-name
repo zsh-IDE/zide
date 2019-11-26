@@ -1,0 +1,21 @@
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Copyright (c) 2019 Sebastian Gniazdowski
+# License: MIT
+
+# Returns ANSI-colorified "user/module" string, from any supported
+# module spec (user---module, user/module, user module, module).
+#
+# $1 - module spec (4 formats: user---module, user/module, user, module)
+# $2 - module (only when $1 - i.e. user - given)
+# $REPLY = ANSI-colorified "user/module" string
+
+.zide-any-to-user-module "$1" "$2"
+local user="${reply[-2]}" module="${reply[-1]}"
+[[ "$user" = "%" ]] && {
+    module="${module/$HOME/HOME}"
+    REPLY="${ZIDE[c-uname]}%${ZIDE[c-rst]}${ZIDE[c-mname]}${module}${ZIDE[c-rst]}"
+} || \
+    REPLY="${user:+${ZIDE[c-uname]}${user}${ZIDE[c-rst]}/}${ZIDE[c-mname]}${module}${ZIDE[c-rst]}"
+
+# vim:ft=zsh:sw=4:sts=4:et
