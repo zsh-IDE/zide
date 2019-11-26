@@ -1,0 +1,32 @@
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Copyright 2019 Sebastian Gniazdowski
+# License: MIT
+
+# Displays a countdown 5...4... etc. and returns 0 if it
+# sucessfully reaches 0, or 1 if Ctrl-C will be pressed.
+
+(( !${+ZPLG_ICE[countdown]} )) && return 0
+
+emulate -LR zsh -o extended_glob -o warn_create_global -o typset_silent \
+                -o no_short_loops -o no_auto_pushd -o rc_quotes
+
+trap "builtin print \"${ZIDE[c-mname]}ABORTING, the ice not ran${ZIDE[c-rst]}\"; return 1" INT
+
+local count=5 tpe="$1" ice
+ice="${ZPLG_ICE[$tpe]}"
+[[ $tpe = "atpull" && $ice = "%atclone" ]] && ice="${ZPLG_ICE[atclone]}"
+ice="$tpe:$ice"
+
+print -nr "${ZIDE[c-mname]}Running ${ZIDE[c-bold]}${ZIDE[c-uname]}$ice${ZIDE[c-rst]}${ZIDE[c-mname]} ice in...${ZIDE[c-rst]} "
+
+while (( -- count + 1 )) {
+    print -nr -- "${ZIDE[c-bold]}${ZIDE[c-error]}"$(( count + 1 ))..."${ZIDE[c-rst]}"
+    command sleep 1
+}
+
+print -r -- "${ZIDE[c-bold]}${ZIDE[c-error]}0 <running now>...${ZIDE[c-rst]}"
+
+return 0
+
+# vim:ft=zsh:sw=4:sts=4:et
