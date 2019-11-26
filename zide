@@ -19,4 +19,25 @@ emulate -LR zsh
 setopt extended_glob warn_create_global typeset_silent \
         no_short_loops rc_quotes no_auto_pushd
 
+local action=$1 name
+local -a ide_mods
+local -A Mods
+
+Mods=(
+    # Zdharma
+    zshelldoc       "zdharma/zshelldoc"
+    zflai           "zdharma/zflai"
+    zui             "zdharma/zui"
+    zsh-string-lib  "zdharma/zsh-string-lib"
+    # Zsh-ide
+    shu2            "zsh-ide/shu2"
+    # Molovo
+    zunit           "zunit-zsh/zunit"
+    revolver        "molovo/revolver"
+    # Jsks
+    czhttpd         "jsks/czhttpd"
+    # Mvdan
+    shfmt           "bin:mvdan/sh"
+)
+
 # vim:ft=zsh:sw=4:sts=4:et
