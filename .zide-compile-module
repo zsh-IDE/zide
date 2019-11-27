@@ -1,0 +1,72 @@
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Copyright 2019 Sebastian Gniazdowski
+# License: MIT
+#
+# $1 - plugin spec (4 formats: user---plugin, user/plugin, user, plugin)
+# $2 - plugin (only when $1 - i.e. user - given)
+
+# $id_as - a /-separated pair if second element
+# is not empty and first is not "%" - then it's
+# just $1 in first case, or $1$2 in second case
+local id_as="$1${2:+${${${(M)1:#%}:+$2}:-/$2}}" first plugin_dir filename is_snippet
+local -a list
+
+local -A ICE
+.zide-compute-ice "$id_as" "pack" \
+    ICE plugin_dir filename is_snippet || return 1
+
+[[ "${ICE[pick]}" = "/dev/null" ]] && return 0
+
+if [[ ${ICE[as]} != "command" && ( ${+ICE[nocompile]} = "0" || ${ICE[nocompile]} = "!" ) ]]; then
+    if [[ -n "${ICE[pick]}" ]]; then
+        list=( ${~${(M)ICE[pick]:#/*}:-$plugin_dir/$ICE[pick]}(DN) )
+        [[ ${#list} -eq 0 ]] && {
+            print "No files for compilation found (pick-ice didn't match)"
+            return 1
+        }
+        reply=( "${list[1]:h}" "${list[1]}" )
+    else
+        if (( is_snippet )) {
+            .zide-first "%" "$plugin_dir" || {
+                print "No files for compilation found"
+                return 1
+            }
+        } else {
+            .zide-first "$1" "$2" || {
+                print "No files for compilation found"
+                return 1
+            }
+        }
+    fi
+    local pdir_path="${reply[-2]}"
+    first="${reply[-1]}"
+    local fname="${first#$pdir_path/}"
+
+    print "Compiling ${ZPLGM[col-info]}$fname${ZPLGM[col-rst]}..."
+    [[ -z ${ICE[(i)(\!|)(sh|bash|ksh|csh)]} ]] && {
+        zcompile "$first" || {
+            print "Compilation failed. Don't worry, the plugin will work also without compilation"
+            print "Consider submitting an error report to Zplugin or to the plugin's author"
+        }
+    }
+    # Try to catch possible additional file
+    zcompile "${${first%.plugin.zsh}%.zsh-theme}.zsh" 2>/dev/null
+fi
+
+if [[ -n "${ICE[compile]}" ]]; then
+    eval "list=( \$plugin_dir/${~ICE[compile]}(DN) )"
+    [[ ${#list} -eq 0 ]] && {
+        print "Warning: Ice mod compile'' didn't match any files"
+    } || {
+        for first in "${list[@]}"; do
+            zcompile "$first"
+        done
+        local sep="${ZPLGM[col-pname]},${ZPLGM[col-rst]} "
+        print "Compiled following additional files (${ZPLGM[col-pname]}the compile''-ice${ZPLGM[col-rst]}): ${(pj:$sep:)${(@)${list[@]//(#b).([^.\/]##(#e))/.${ZPLGM[col-info]}${match[1]}${ZPLGM[col-rst]}}#$plugin_dir/}}"
+    }
+fi
+
+return 0
+
+# vim:ft=zsh:sw=4:sts=4:et
