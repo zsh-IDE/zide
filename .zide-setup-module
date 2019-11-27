@@ -51,21 +51,21 @@ trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef; r
     print -- "\\nDownloading $REPLY...${id_as:+ (as ${id_as}...)}"
 
     local site
-    [[ -n ${ZPLG_ICE[from]} ]] && site=${sites[${ZPLG_ICE[from]}]}
-    [[ -z $site && ${ZPLG_ICE[from]} = *(gh-r|github-rel)* ]] && {
-        site=${ZPLG_ICE[from]/(gh-r|github-re)/${sites[gh-r]}}
+    [[ -n ${ZIDE_ICE[from]} ]] && site=${sites[${ZIDE_ICE[from]}]}
+    [[ -z $site && ${ZIDE_ICE[from]} = *(gh-r|github-rel)* ]] && {
+        site=${ZIDE_ICE[from]/(gh-r|github-re)/${sites[gh-r]}}
     }
 
     (
         if [[ $site = *releases ]]; then
-            local url=$site/${ZPLG_ICE[ver]}
+            local url=$site/${ZIDE_ICE[ver]}
             local -a list list2
 
             list=( ${(@f)"$( { .zide-download-file-stdout $url || .zide-download-file-stdout $url 1; } 2>/dev/null | \
                           command grep -o 'href=./'$remote_url_path'/releases/download/[^"]\+')"} )
             list=( "${list[@]#href=?}" )
 
-            [[ -n ${ZPLG_ICE[bpick]} ]] && list=( "${(M)list[@]:#(#i)*/${~ZPLG_ICE[bpick]}}" )
+            [[ -n ${ZIDE_ICE[bpick]} ]] && list=( "${(M)list[@]:#(#i)*/${~ZIDE_ICE[bpick]}}" )
 
             [[ ${#list} -gt 1 ]] && {
                 list2=( "${(M)list[@]:#(#i)*${~matchstr[$CPUTYPE]:-${CPUTYPE#(#i)(i|amd)}}*}" )
@@ -108,43 +108,43 @@ trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef; r
                 return 1
             }
         else
-            case "${ZPLG_ICE[proto]}" in
+            case "${ZIDE_ICE[proto]}" in
                 (|https)
-                    command git clone --progress ${=ZPLG_ICE[cloneopts]:---recursive} \
-                        ${=ZPLG_ICE[depth]:+--depth ${ZPLG_ICE[depth]}} \
-                        "https://${site:-${ZPLG_ICE[from]:-github.com}}/$remote_url_path" \
+                    command git clone --progress ${=ZIDE_ICE[cloneopts]:---recursive} \
+                        ${=ZIDE_ICE[depth]:+--depth ${ZIDE_ICE[depth]}} \
+                        "https://${site:-${ZIDE_ICE[from]:-github.com}}/$remote_url_path" \
                         "$local_path" \
                         --config transfer.fsckobjects=false \
                         --config receive.fsckobjects=false \
                         --config fetch.fsckobjects=false \
                             |& { $ZIDE_DIR/git-process-output.zsh || cat; }
-                    (( pipestatus[1] )) && { print "${ZPLGM[col-error]}Clone failed (code: ${pipestatus[1]})${ZPLGM[col-rst]}"; return 1; }
+                    (( pipestatus[1] )) && { print "${ZIDE[col-error]}Clone failed (code: ${pipestatus[1]})${ZIDE[col-rst]}"; return 1; }
                     ;;
                 (git|http|ftp|ftps|rsync|ssh)
-                    command git clone --progress ${=ZPLG_ICE[cloneopts]:---recursive} \
-                        ${=ZPLG_ICE[depth]:+--depth ${ZPLG_ICE[depth]}} \
-                        "${ZPLG_ICE[proto]}://${site:-${ZPLG_ICE[from]:-github.com}}/$remote_url_path" \
+                    command git clone --progress ${=ZIDE_ICE[cloneopts]:---recursive} \
+                        ${=ZIDE_ICE[depth]:+--depth ${ZIDE_ICE[depth]}} \
+                        "${ZIDE_ICE[proto]}://${site:-${ZIDE_ICE[from]:-github.com}}/$remote_url_path" \
                         "$local_path" \
                         --config transfer.fsckobjects=false \
                         --config receive.fsckobjects=false \
                         --config fetch.fsckobjects=false \
-                            |& { ${ZPLGM[BIN_DIR]}/git-process-output.zsh || cat; }
-                    (( pipestatus[1] )) && { print "${ZPLGM[col-error]}Clone failed (code: ${pipestatus[1]})${ZPLGM[col-rst]}"; return 1; }
+                            |& { ${ZIDE[BIN_DIR]}/git-process-output.zsh || cat; }
+                    (( pipestatus[1] )) && { print "${ZIDE[col-error]}Clone failed (code: ${pipestatus[1]})${ZIDE[col-rst]}"; return 1; }
                     ;;
                 (*)
-                    print "${ZPLGM[col-error]}Unknown protocol:${ZPLGM[col-rst]} ${ZPLG_ICE[proto]}"
+                    print "${ZIDE[col-error]}Unknown protocol:${ZIDE[col-rst]} ${ZIDE_ICE[proto]}"
                     return 1
             esac
 
-            if [[ -n ${ZPLG_ICE[ver]} ]]; then
-                command git -C "$local_path" checkout "${ZPLG_ICE[ver]}"
+            if [[ -n ${ZIDE_ICE[ver]} ]]; then
+                command git -C "$local_path" checkout "${ZIDE_ICE[ver]}"
             fi
         fi
 
-        [[ ${+ZPLG_ICE[make]} = 1 && ${ZPLG_ICE[make]} = "!!"* ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)${ZPLG_ICE[make]#\!\!}}; }
+        [[ ${+ZIDE_ICE[make]} = 1 && ${ZIDE_ICE[make]} = "!!"* ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)${ZIDE_ICE[make]#\!\!}}; }
 
-        if [[ -n ${ZPLG_ICE[mv]} ]]; then
-            local from="${ZPLG_ICE[mv]%%[[:space:]]#->*}" to="${ZPLG_ICE[mv]##*->[[:space:]]#}"
+        if [[ -n ${ZIDE_ICE[mv]} ]]; then
+            local from="${ZIDE_ICE[mv]%%[[:space:]]#->*}" to="${ZIDE_ICE[mv]##*->[[:space:]]#}"
             local -a afr
             ( () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } || return 1
               afr=( ${~from}(DN) )
@@ -152,8 +152,8 @@ trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef; r
             )
         fi
 
-        if [[ -n ${ZPLG_ICE[cp]} ]]; then
-            local from="${ZPLG_ICE[cp]%%[[:space:]]#->*}" to="${ZPLG_ICE[cp]##*->[[:space:]]#}"
+        if [[ -n ${ZIDE_ICE[cp]} ]]; then
+            local from="${ZIDE_ICE[cp]%%[[:space:]]#->*}" to="${ZIDE_ICE[cp]##*->[[:space:]]#}"
             local -a afr
             ( () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } || return 1
               afr=( ${~from}(DN) )
@@ -161,38 +161,38 @@ trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef; r
             )
         fi
 
-        if [[ "$site" != *"releases" && ${ZPLG_ICE[nocompile]} != '!' ]]; then
+        if [[ "$site" != *"releases" && ${ZIDE_ICE[nocompile]} != '!' ]]; then
             # Compile plugin
-            [[ -z ${ZPLG_ICE[(i)(\!|)(sh|bash|ksh|csh)]} ]] && {
+            [[ -z ${ZIDE_ICE[(i)(\!|)(sh|bash|ksh|csh)]} ]] && {
                 .zide-compile-module "$id_as" ""
             }
         fi
 
         if [[ "$4" != "-u" ]]; then
             # Store ices at clone of a plugin
-            .zide-store-ices "$local_path/._zide" ZPLG_ICE "" "" "" ""
+            .zide-store-ices "$local_path/._zide" ZIDE_ICE "" "" "" ""
 
-            reply=( "${(@on)ZPLG_EXTS[(I)z-annex hook:\\\!atclone <->]}" )
+            reply=( "${(@on)ZIDE_EXTS[(I)zide-annex hook:\\\!atclone <->]}" )
             for key in "${reply[@]}"; do
-                arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+                arr=( "${(Q)${(z@)ZIDE_EXTS[$key]}[@]}" )
                 "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_path" \!atclone
             done
 
-            [[ ${+ZPLG_ICE[make]} = 1 && ${ZPLG_ICE[make]} = ("!"[^\!]*|"!") ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)${ZPLG_ICE[make]#\!}}; }
-            (( ${+ZPLG_ICE[atclone]} )) && .zide-countdown "atclone" && { local __oldcd="$PWD"; (( ${+ZPLG_ICE[nocd]} == 0 )) && { () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } && eval "${ZPLG_ICE[atclone]}"; ((1)); } || eval "${ZPLG_ICE[atclone]}"; () { setopt localoptions noautopushd; builtin cd -q "$__oldcd"; }; }
-            [[ ${+ZPLG_ICE[make]} = 1 && ${ZPLG_ICE[make]} != "!"* ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)ZPLG_ICE[make]}; }
+            [[ ${+ZIDE_ICE[make]} = 1 && ${ZIDE_ICE[make]} = ("!"[^\!]*|"!") ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)${ZIDE_ICE[make]#\!}}; }
+            (( ${+ZIDE_ICE[atclone]} )) && .zide-countdown "atclone" && { local __oldcd="$PWD"; (( ${+ZIDE_ICE[nocd]} == 0 )) && { () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } && eval "${ZIDE_ICE[atclone]}"; ((1)); } || eval "${ZIDE_ICE[atclone]}"; () { setopt localoptions noautopushd; builtin cd -q "$__oldcd"; }; }
+            [[ ${+ZIDE_ICE[make]} = 1 && ${ZIDE_ICE[make]} != "!"* ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)ZIDE_ICE[make]}; }
 
-            reply=( "${(@on)ZPLG_EXTS[(I)z-annex hook:atclone <->]}" )
+            reply=( "${(@on)ZIDE_EXTS[(I)zide-annex hook:atclone <->]}" )
             for key in "${reply[@]}"; do
-                arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+                arr=( "${(Q)${(z@)ZIDE_EXTS[$key]}[@]}" )
                 "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_path" atclone
             done
         fi
 
-        if [[ "$site" != *"releases" && ${ZPLG_ICE[nocompile]} = '!' ]]; then
+        if [[ "$site" != *"releases" && ${ZIDE_ICE[nocompile]} = '!' ]]; then
             # Compile plugin
             LANG=C sleep 0.3
-            [[ -z ${ZPLG_ICE[(i)(\!|)(sh|bash|ksh|csh)]} ]] && {
+            [[ -z ${ZIDE_ICE[(i)(\!|)(sh|bash|ksh|csh)]} ]] && {
                 .zide-compile-module "$id_as" ""
             }
         fi
