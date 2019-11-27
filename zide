@@ -36,7 +36,7 @@ local -a match mbegin mend reply
 
 local action=$1 name
 local -a ide_mods shift noet license
-local -A Mods ZIDE
+local -A Mods ZIDE ZIDE_ICE ZIDE_EXTS
 
 ZIDE=(
     c-uname $'\e[35m'
