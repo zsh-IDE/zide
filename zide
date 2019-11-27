@@ -31,6 +31,9 @@ emulate -LR zsh
 setopt extended_glob warn_create_global typeset_silent \
         no_short_loops rc_quotes no_auto_pushd
 
+local MATCH REPLY; integer MBEGIN MEND
+local -a match mbegin mend reply
+
 local action=$1 name
 local -a ide_mods shift noet license
 local -A Mods
