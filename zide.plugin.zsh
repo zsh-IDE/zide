@@ -13,4 +13,9 @@ fi
 
 typeset -g ZIDE_DIR=${0:h}
 
-autoload -Uz zide
+autoload -Uz \
+    zide \
+    .zide-any-to-user-module \
+    .zide-colorify-module-name \
+    .zide-countdown \
+    .zide-setup-module
