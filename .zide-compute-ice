@@ -36,6 +36,7 @@ ice_order=(
     # stripping them from the possible: ''
     ${(@us.|.)${ZPLG_EXTS[ice-mods]//\'\'/}}
 )
+
 nval_ices=(
         blockf silent lucid trackbinds cloneonly nocd run-atpull
         nocompletions sh \!sh bash \!bash ksh \!ksh csh \!csh
@@ -54,22 +55,13 @@ nval_ices=(
 __URL="${${__URL#"${__URL%%[! $'\t']*}"}%/}"
 
 # Snippet?
-.zide-two-paths "$__URL"
-local __s_path="${reply[-4]}" __s_svn="${reply[-3]}" ___path="${reply[-2]}" __filename="${reply[-1]}" __local_dir
-if [[ -d $__s_path || -d $___path ]]; then
-    __is_snippet=1
-else
-    # Plugin
-    .zide-shands-exp "$__URL" && __URL="$REPLY"
-    .zide-any-to-user-module "$__URL" ""
-    local __user="${reply[-2]}" __module="${reply[-1]}"
-    __s_path="" __filename=""
-    [[ $__user = "%" ]] && ___path="$__module" || ___path="${ZPLGM[PLUGINS_DIR]}/${__user:+${__user}---}${__module//\//---}"
-    .zide-exists-physically-message "$__user" "$__module" || return 1
-fi
+.zide-any-to-user-module "$__URL" ""
+local __user="${reply[-2]}" __module="${reply[-1]}"
+__s_path="" __filename=""
+[[ $__user = "%" ]] && ___path="$__module" || ___path="./${__module//\//---}"
 
-[[ $__pack = pack* ]] && (( ${#ZPLG_ICE} > 0 )) && \
-    .zide-pack-ice "${__user-$__URL}" "$__module"
+#[[ $__pack = pack* ]] && (( ${#ZPLG_ICE} > 0 )) && \
+#    .zide-pack-ice "${__user-$__URL}" "$__module"
 
 local -A __sice
 local -a __tmp
