@@ -1,0 +1,329 @@
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Copyright (c) 2019 Sebastian Gniazdowski
+# License: MIT
+
+# Don't leak any functions
+typeset -g zide_ef
+zide_ef=( ${(k)functions} )
+trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef" EXIT
+trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef; return 1" INT
+
+# FUNCTION: .zide-setup-module-dir {{{
+#
+# $1 - user
+# $2 - plugin
+# $3 - id-as
+# $4 - local directory where to download the module
+.zide-setup-module-dir() {
+    local user="$1" plugin="$2" id_as="$3" remote_url_path="${1:+$1/}$2" local_path="$4"
+
+    local -A sites
+    sites=(
+        "github"    "github.com"
+        "gh"        "github.com"
+        "bitbucket" "bitbucket.org"
+        "bb"        "bitbucket.org"
+        "gitlab"    "gitlab.com"
+        "gl"        "gitlab.com"
+        "notabug"   "notabug.org"
+        "nb"        "notabug.org"
+        "github-rel" "github.com/$remote_url_path/releases"
+        "gh-r"      "github.com/$remote_url_path/releases"
+    )
+
+    local -A matchstr
+    matchstr=(
+        "i386"    "(386|686)"
+        "i686"    "(386|686)"
+        "x86_64"  "(x86_64|amd64|intel)"
+        "amd64"   "(x86_64|amd64|intel)"
+        "aarch64" "aarch64"
+        "linux"   "(linux|linux-gnu)"
+        "darwin"  "(darwin|macos|mac-os|osx|os-x)"
+        "cygwin"  "(windows|cygwin)"
+        "windows" "(windows|cygwin)"
+    )
+
+    local -a arr
+
+    .zide-colorify-module-name "$user" "$plugin"
+    print -- "\\nDownloading $REPLY...${id_as:+ (as ${id_as}...)}"
+
+    local site
+    [[ -n ${ZPLG_ICE[from]} ]] && site=${sites[${ZPLG_ICE[from]}]}
+    [[ -z $site && ${ZPLG_ICE[from]} = *(gh-r|github-rel)* ]] && {
+        site=${ZPLG_ICE[from]/(gh-r|github-re)/${sites[gh-r]}}
+    }
+
+    (
+        if [[ $site = *releases ]]; then
+            local url=$site/${ZPLG_ICE[ver]}
+            local -a list list2
+
+            list=( ${(@f)"$( { .zide-download-file-stdout $url || .zide-download-file-stdout $url 1; } 2>/dev/null | \
+                          command grep -o 'href=./'$remote_url_path'/releases/download/[^"]\+')"} )
+            list=( "${list[@]#href=?}" )
+
+            [[ -n ${ZPLG_ICE[bpick]} ]] && list=( "${(M)list[@]:#(#i)*/${~ZPLG_ICE[bpick]}}" )
+
+            [[ ${#list} -gt 1 ]] && {
+                list2=( "${(M)list[@]:#(#i)*${~matchstr[$CPUTYPE]:-${CPUTYPE#(#i)(i|amd)}}*}" )
+                [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
+            }
+
+            [[ ${#list} -gt 1 ]] && {
+                list2=( "${(M)list[@]:#(#i)*${~matchstr[${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}]:-${${OSTYPE%(#i)-gnu}%%(-|)[0-9.]##}}*}" )
+                [[ ${#list2} -gt 0 ]] && list=( "${list2[@]}" )
+            }
+
+            [[ ${#list} -eq 0 ]] && {
+                print "Didn't find correct Github release-file to download" \
+                    "(for \`$remote_url_path')"
+                return 1
+            }
+
+            command mkdir -p $local_path
+            [[ -d $local_path ]] || return 1
+
+            (
+                () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } || return 1
+                url="https://github.com${list[1]}"
+                print "(Requesting \`${list[1]:t}'...)"
+                .zide-download-file-stdout "$url" >! "${list[1]:t}" || {
+                    .zide-download-file-stdout "$url" 1 >! "${list[1]:t}" || {
+                        command rm -f "${list[1]:t}"
+                        print -r "Download of release for \`$remote_url_path' failed. No available download tool? (one of: curl, wget, lftp, lynx)"
+                        print -r "Tried url: $url"
+                        return 1
+                    }
+                }
+
+                command mkdir -p ._zide
+                print -r -- "$url" >! ._zide/url
+                print -r -- "${list[1]}" >! ._zide/is_release
+                .zide-handle-binary-file "$url" "${list[1]:t}"
+                return $?
+            ) || {
+                return 1
+            }
+        else
+            case "${ZPLG_ICE[proto]}" in
+                (|https)
+                    command git clone --progress ${=ZPLG_ICE[cloneopts]:---recursive} \
+                        ${=ZPLG_ICE[depth]:+--depth ${ZPLG_ICE[depth]}} \
+                        "https://${site:-${ZPLG_ICE[from]:-github.com}}/$remote_url_path" \
+                        "$local_path" \
+                        --config transfer.fsckobjects=false \
+                        --config receive.fsckobjects=false \
+                        --config fetch.fsckobjects=false \
+                            |& { $ZIDE_DIR/git-process-output.zsh || cat; }
+                    (( pipestatus[1] )) && { print "${ZPLGM[col-error]}Clone failed (code: ${pipestatus[1]})${ZPLGM[col-rst]}"; return 1; }
+                    ;;
+                (git|http|ftp|ftps|rsync|ssh)
+                    command git clone --progress ${=ZPLG_ICE[cloneopts]:---recursive} \
+                        ${=ZPLG_ICE[depth]:+--depth ${ZPLG_ICE[depth]}} \
+                        "${ZPLG_ICE[proto]}://${site:-${ZPLG_ICE[from]:-github.com}}/$remote_url_path" \
+                        "$local_path" \
+                        --config transfer.fsckobjects=false \
+                        --config receive.fsckobjects=false \
+                        --config fetch.fsckobjects=false \
+                            |& { ${ZPLGM[BIN_DIR]}/git-process-output.zsh || cat; }
+                    (( pipestatus[1] )) && { print "${ZPLGM[col-error]}Clone failed (code: ${pipestatus[1]})${ZPLGM[col-rst]}"; return 1; }
+                    ;;
+                (*)
+                    print "${ZPLGM[col-error]}Unknown protocol:${ZPLGM[col-rst]} ${ZPLG_ICE[proto]}"
+                    return 1
+            esac
+
+            if [[ -n ${ZPLG_ICE[ver]} ]]; then
+                command git -C "$local_path" checkout "${ZPLG_ICE[ver]}"
+            fi
+        fi
+
+        [[ ${+ZPLG_ICE[make]} = 1 && ${ZPLG_ICE[make]} = "!!"* ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)${ZPLG_ICE[make]#\!\!}}; }
+
+        if [[ -n ${ZPLG_ICE[mv]} ]]; then
+            local from="${ZPLG_ICE[mv]%%[[:space:]]#->*}" to="${ZPLG_ICE[mv]##*->[[:space:]]#}"
+            local -a afr
+            ( () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } || return 1
+              afr=( ${~from}(DN) )
+              [[ ${#afr} -gt 0 ]] && { command mv -vf "${afr[1]}" "$to"; command mv -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+            )
+        fi
+
+        if [[ -n ${ZPLG_ICE[cp]} ]]; then
+            local from="${ZPLG_ICE[cp]%%[[:space:]]#->*}" to="${ZPLG_ICE[cp]##*->[[:space:]]#}"
+            local -a afr
+            ( () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } || return 1
+              afr=( ${~from}(DN) )
+              [[ ${#afr} -gt 0 ]] && { command cp -vf "${afr[1]}" "$to"; command cp -vf "${afr[1]}".zwc "$to".zwc 2>/dev/null; }
+            )
+        fi
+
+        if [[ "$site" != *"releases" && ${ZPLG_ICE[nocompile]} != '!' ]]; then
+            # Compile plugin
+            [[ -z ${ZPLG_ICE[(i)(\!|)(sh|bash|ksh|csh)]} ]] && {
+                .zide-compile-module "$id_as" ""
+            }
+        fi
+
+        if [[ "$4" != "-u" ]]; then
+            # Store ices at clone of a plugin
+            .zide-store-ices "$local_path/._zide" ZPLG_ICE "" "" "" ""
+
+            reply=( "${(@on)ZPLG_EXTS[(I)z-annex hook:\\\!atclone <->]}" )
+            for key in "${reply[@]}"; do
+                arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+                "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_path" \!atclone
+            done
+
+            [[ ${+ZPLG_ICE[make]} = 1 && ${ZPLG_ICE[make]} = ("!"[^\!]*|"!") ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)${ZPLG_ICE[make]#\!}}; }
+            (( ${+ZPLG_ICE[atclone]} )) && .zide-countdown "atclone" && { local __oldcd="$PWD"; (( ${+ZPLG_ICE[nocd]} == 0 )) && { () { setopt localoptions noautopushd; builtin cd -q "$local_path"; } && eval "${ZPLG_ICE[atclone]}"; ((1)); } || eval "${ZPLG_ICE[atclone]}"; () { setopt localoptions noautopushd; builtin cd -q "$__oldcd"; }; }
+            [[ ${+ZPLG_ICE[make]} = 1 && ${ZPLG_ICE[make]} != "!"* ]] && .zide-countdown make && { command make -C "$local_path" ${(@s; ;)ZPLG_ICE[make]}; }
+
+            reply=( "${(@on)ZPLG_EXTS[(I)z-annex hook:atclone <->]}" )
+            for key in "${reply[@]}"; do
+                arr=( "${(Q)${(z@)ZPLG_EXTS[$key]}[@]}" )
+                "${arr[5]}" "plugin" "$user" "$plugin" "$id_as" "$local_path" atclone
+            done
+        fi
+
+        if [[ "$site" != *"releases" && ${ZPLG_ICE[nocompile]} = '!' ]]; then
+            # Compile plugin
+            LANG=C sleep 0.3
+            [[ -z ${ZPLG_ICE[(i)(\!|)(sh|bash|ksh|csh)]} ]] && {
+                .zide-compile-module "$id_as" ""
+            }
+        fi
+
+    ) || return $?
+
+    return 0
+} # }}}
+
+# FUNCTION: .zide-handle-binary-file {{{
+# If the file is an archive, it is extracted by this function.
+# Next stage is scanning of files with the common utility `file',
+# to detect executables. They are given +x mode. There are also
+# messages to the user on performed actions.
+#
+# $1 - url
+# $2 - file
+.zide-handle-binary-file() {
+    setopt localoptions extendedglob nokshglob warncreateglobal
+
+    local url="$1" file="$2"
+
+    command mkdir -p ._backup
+    command rm -f ._backup/*(DN)
+    command mv -f *~(._zide*|.zplugin_lstupd|._backup|.git|$file)(DN) ._backup 2>/dev/null
+
+    .zide-extract-wrapper() {
+        local file="$1" fun="$2" retval
+        print "Extracting files from: \`$file'..."
+        $fun; retval=$?
+        command rm -f "$file"
+        return $retval
+    }
+
+    case "$file" in
+        (*.zip)
+            .zide-extract() { command unzip "$file"; }
+            ;;
+        (*.rar)
+            .zide-extract() { command unrar x "$file"; }
+            ;;
+        (*.tar.bz2|*.tbz2)
+            .zide-extract() { command bzip2 -dc "$file" | command tar -xf -; }
+            ;;
+        (*.tar.gz|*.tgz)
+            .zide-extract() { command gzip -dc "$file" | command tar -xf -; }
+            ;;
+        (*.tar.xz|*.txz)
+            .zide-extract() { command xz -dc "$file" | command tar -xf -; }
+            ;;
+        (*.tar.7z|*.t7z)
+            .zide-extract() { command 7z x -so "$file" | command tar -xf -; }
+            ;;
+        (*.tar)
+            .zide-extract() { command tar -xf "$file"; }
+            ;;
+        (*.gz)
+            .zide-extract() { command gunzip "$file"; }
+            ;;
+    esac
+
+    [[ $(typeset -f + -- .zide-extract) == ".zide-extract" ]] && {
+        .zide-extract-wrapper "$file" .zide-extract || {
+            print "Extraction of archive had problems, restoring previous version of the command"
+            command mv ._backup/*(D) .
+            return 1
+        }
+        unfunction -- .zide-extract
+    }
+    unfunction -- .zide-extract-wrapper
+
+    local -a execs
+    execs=( ${(@f)"$( file **/*(DN-.) )"} )
+    execs=( "${(M)execs[@]:#[^:]##:*executable*}" )
+    execs=( "${execs[@]/(#b)([^:]##):*/${match[1]}}" )
+
+    [[ ${#execs} -gt 0 ]] && {
+        command chmod a+x "${execs[@]}"
+        if [[ "${execs[1]}" = "$file" ]]; then
+            print -r -- "Successfully downloaded and installed the executable: \`$file'."
+        else
+            print -r -- "Successfully installed executables (\"${(j:", ":)execs}\") contained in \`$file'."
+        fi
+    }
+
+    REPLY="${execs[1]}"
+    return 0
+}
+# }}}
+
+# FUNCTION: .zide-download-file-stdout {{{
+# Downloads file to stdout. Supports following backend commands:
+# curl, wget, lftp, lynx. Used by snippet loading.
+.zide-download-file-stdout() {
+    local url="$1" restart="$2"
+
+    setopt localoptions localtraps
+
+    if (( restart )); then
+        (( ${path[(I)/usr/local/bin]} )) || \
+            {
+                path+=( "/usr/local/bin" );
+                trap "path[-1]=()" EXIT
+            }
+
+        if (( ${+commands[curl]} )) then
+            command curl -fsSL "$url" || return 1
+        elif (( ${+commands[wget]} )); then
+            command wget -q "$url" -O - || return 1
+        elif (( ${+commands[lftp]} )); then
+            command lftp -c "cat $url" || return 1
+        elif (( ${+commands[lynx]} )) then
+            command lynx -source "$url" || return 1
+        else
+            return 2
+        fi
+    else
+        if type curl 2>/dev/null 1>&2; then
+            command curl -fsSL "$url" || return 1
+        elif type wget 2>/dev/null 1>&2; then
+            command wget -q "$url" -O - || return 1
+        elif type lftp 2>/dev/null 1>&2; then
+            command lftp -c "cat $url" || return 1
+        else
+            .zide-download-file-stdout "$url" "1"
+            return $?
+        fi
+    fi
+
+    return 0
+} # }}}
+
+.zide-setup-module-dir "$1" "$2" "$3" "$4"
+# vim:ft=zsh:sw=4:sts=4:et
