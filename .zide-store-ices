@@ -1,0 +1,71 @@
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Copyright 2019 Sebastian Gniazdowski
+# License: MIT
+
+# Saves ice mods in given hash onto disk.
+#
+# $1 - directory where to create / delete files
+# $2 - name of hash that holds values
+# $3 - additional keys of hash to store, space separated
+# $4 - additional keys of hash to store, empty-meaningful ices, space separated
+# $5 – the URL, if applicable
+# $6 – the mode (1 - svn, 0 - single file), if applicable
+
+local __pfx="$1" __ice_var="$2" \
+      __add_ices="$3" __add_ices2="$4" \
+      url="$5" mode="$6"
+
+local -a ice_order nval_ices
+ice_order=(
+    svn proto from teleid bindmap cloneopts id-as depth if wait load
+    unload blockf pick bpick src as ver silent lucid notify mv cp
+    atinit atclone atload atpull nocd run-atpull has cloneonly make
+    service trackbinds multisrc compile nocompile nocompletions
+    reset-prompt wrap-track reset sh \!sh bash \!bash ksh \!ksh csh
+    \!csh aliases countdown ps-on-unload ps-on-update trigger-load
+    light-mode is-snippet
+    # Include all additional ices – after
+    # stripping them from the possible: ''
+    ${(@s.|.)${ZPLG_EXTS[ice-mods]//\'\'/}}
+)
+
+nval_ices=(
+        blockf silent lucid trackbinds cloneonly nocd run-atpull
+        nocompletions sh \!sh bash \!bash ksh \!ksh csh \!csh
+        aliases countdown light-mode is-snippet
+
+        # Include only those additional ices,
+        # don't have the '' in their name, i.e.
+        # aren't designed to hold value
+        ${(@)${(@s.|.)ZPLG_EXTS[ice-mods]}:#*\'\'*}
+
+        # Must be last
+        svn
+)
+
+command mkdir -p "$__pfx"
+local __key __var_name
+# No nval_ices here
+for __key in ${ice_order[@]:#(${(~j:|:)nval_ices[@]})} ${(s: :)__add_ices[@]}; do
+    __var_name="${__ice_var}[$__key]"
+    (( ${(P)+__var_name} )) && \
+        builtin print -r -- "${(P)__var_name}" >! "$__pfx"/"$__key"
+done
+
+# Ices that even empty mean something
+for __key in make pick nocompile reset ${nval_ices[@]} ${(s: :)__add_ices2[@]}; do
+    __var_name="${__ice_var}[$__key]"
+    if (( ${(P)+__var_name} )) {
+        builtin print -r -- "${(P)__var_name}" >! "$__pfx"/"$__key"
+    } else {
+        command rm -f "$__pfx"/"$__key"
+    }
+done
+
+# url and mode are declared at the beginning of the body
+for __key in url mode; do
+    [[ -n "${(P)__key}" ]] && builtin print -r -- "${(P)__key}" >! "$__pfx"/"$__key"
+done
+
+# vim:ft=zsh:sw=4:sts=4:et
