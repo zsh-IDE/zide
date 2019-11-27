@@ -40,7 +40,7 @@ local -A Mods ZIDE ZIDE_ICE ZIDE_EXTS
 
 ZIDE=(
     c-uname $'\e[35m'
-    c-mname $'\e[34m'
+    c-mname `print -P %F{33}`
     c-bold  $'\e[1m'
     c-uline $'\e[4m'
     c-rst   $'\e[0m'
