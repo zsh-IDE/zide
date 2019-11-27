@@ -72,8 +72,8 @@ case $action in
         #
         # The options are:
         # --with/--mod/-m/--use – to pass the desired module(s)
-        zparseopts -D -E -K -M -mod:=ide_mods m:=ide_mods \
-            -with:=ide_mods -use:=ide_mods
+        zparseopts -D -E -K -M -mod+:=ide_mods m+:=ide_mods \
+            -with+:=ide_mods -use+:=ide_mods
         name=$2
         ;;
 
