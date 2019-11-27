@@ -325,5 +325,52 @@ trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef; r
     return 0
 } # }}}
 
+# FUNCTION: .zide-find-other-matches {{{
+# Plugin's main source file is in general `name.plugin.zsh'. However,
+# there can be different conventions, if that file is not found, then
+# this functions examines other conventions in order of most expected
+# sanity.
+.zide-find-other-matches() {
+    local pdir_path="$1" pbase="$2"
+
+    if [[ -e "$pdir_path/init.zsh" ]]; then
+        reply=( "$pdir_path/init.zsh" )
+    elif [[ -e "$pdir_path/${pbase}.zsh-theme" ]]; then
+        reply=( "$pdir_path/${pbase}.zsh-theme" )
+    elif [[ -e "$pdir_path/${pbase}.theme.zsh" ]]; then
+        reply=( "$pdir_path/${pbase}.theme.zsh" )
+    else
+        reply=(
+            $pdir_path/*.plugin.zsh(DN) $pdir_path/*.zsh-theme(DN) $pdir_path/init.zsh(DN)
+            $pdir_path/*.zsh(DN) $pdir_path/*.sh(DN) $pdir_path/.zshrc(DN)
+        )
+    fi
+} # }}}
+
+# FUNCTION: .zide-first {{{
+.zide-first() {
+    .zide-any-to-user-module "$1" "$2"
+    local user="${reply[-2]}" plugin="${reply[-1]}"
+
+    local dname=components/${reply[-1]}
+
+    # Look for file to compile. First look for the most common one
+    # (optimization) then for other possibilities
+    if [[ ! -e "$dname/${reply[-1]}.plugin.zsh" ]]; then
+        .zide-find-other-matches "$dname" "${reply[-1]}"
+    else
+        reply=( "$dname/${reply[-1]}.plugin.zsh" )
+    fi
+
+    if [[ "${#reply}" -eq "0" ]]; then
+        reply=( "$dname" "" )
+        return 1
+    fi
+
+    # Take first entry (ksharrays resilience)
+    reply=( "$dname" "${reply[-${#reply}]}" )
+    return 0
+} # }}}
+
 .zide-setup-module-dir "$1" "$2" "$3" "$4"
 # vim:ft=zsh:sw=4:sts=4:et
