@@ -23,6 +23,7 @@ if [[ $0 != zide || -n $ZSH_SCRIPT ]]; then
         .zide-compute-ice \
         .zide-store-ices \
         .zide-compile-module \
+        .zide-ice \
         .zide-setup-module
 fi
 
@@ -36,7 +37,7 @@ local -a match mbegin mend reply
 
 local action=$1 name
 local -a ide_mods shift noet license
-local -A Mods ZIDE ZIDE_ICE ZIDE_EXTS
+local -A Mods Mods_Ices ZIDE ZIDE_ICE ZIDE_EXTS
 
 ZIDE=(
     c-uname $'\e[35m'
@@ -60,8 +61,26 @@ Mods=(
     # Jsks
     czhttpd         "jsks/czhttpd"
     # Mvdan
-    shfmt           "bin:mvdan/sh"
+    shfmt           "mvdan/sh"
 )
+
+Mods_Ices=(
+    # Zdharma
+    zshelldoc       "make'install PREFIX=bin'"
+    zflai           ""
+    zui             ""
+    zsh-string-lib  ""
+    # Zsh-ide
+    shu2            ""
+    # Molovo
+    zunit           "atclone'./build' atpull'%atclone'"
+    revolver        "atclone'./build' atpull'%atclone'"
+    # Jsks
+    czhttpd         "jsks/czhttpd"
+    # Mvdan
+    shfmt           "from'gh-r'"
+)
+
 
 case $action in
     (create)
@@ -127,10 +146,7 @@ EOF
 for mod ( $ide_mods ) {
     local modv=${Mods[$mod]}
     ZIDE_ICE=()
-    if [[ $modv = bin:* ]]; then
-        ZIDE_ICE[from]=gh-r
-        modv=${modv#bin:}
-    fi
+    .zide-ice "${(@Q)${(@z)Mods_Ices[$mod]}}"
     .zide-any-to-user-module "$modv"
     .zide-setup-module "${reply[1]}" "${reply[2]}" "$mod" components/$mod
 }
