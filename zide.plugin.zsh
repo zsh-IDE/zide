@@ -18,4 +18,9 @@ autoload -Uz \
     .zide-any-to-user-module \
     .zide-colorify-module-name \
     .zide-countdown \
+    .zide-compute-ice \
+    .zide-store-ices \
+    .zide-compile-module \
+    .zide-ice \
     .zide-setup-module
+
