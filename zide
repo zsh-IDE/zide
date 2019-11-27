@@ -14,6 +14,16 @@ if [[ $0 != zide || -n $ZSH_SCRIPT ]]; then
     0=${${(M)0##/*}:-$PWD/$0}
 
     local ZIDE_DIR=${0:h}
+    fpath+=( "$ZIDE_DIR" )
+
+    autoload -Uz \
+        .zide-any-to-user-module \
+        .zide-colorify-module-name \
+        .zide-countdown \
+        .zide-compute-ice \
+        .zide-store-ices \
+        .zide-compile-module \
+        .zide-setup-module
 fi
 
 # Set the base and typically useful options
