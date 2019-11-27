@@ -1,0 +1,32 @@
+# -*- mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+
+# Copyright 2019 Sebastian Gniazdowski
+# License: MIT
+
+emulate -LR zsh -o extended_glob -o warn_create_global -o typeset_silent \
+    -o no_short_loops -o no_auto_pushd -o rc_quotes
+
+integer retval
+local bit exts="${~ZIDE_EXTS[ice-mods]//\'\'/}"
+for bit; do
+    [[ "$bit" = (#b)(--|)(teleid|from|proto|cloneopts|depth|wait|load|\
+unload|on-update-of|subscribe|if|has|cloneonly|nocloneonly|blockf|\
+svn|nosvn|pick|nopick|src|bpick|as|ver|silent|lucid|mv|cp|atinit|\
+atload|atpull|atclone|run-atpull|norun-atpull|make|nomake|notify|\
+nonotify|reset-prompt|service|compile|nocompile|nocompletions|multisrc|\
+id-as|bindmap|trackbinds|notrackbinds|nocd|once|wrap-track|reset|\
+noreset|sh|\!sh|bash|\!bash|ksh|\!ksh|csh|\!csh|aliases|noaliases|\
+countdown|nocountdown|trigger-load|light-mode|is-snippet|pack${~exts})(*)
+    ]] && \
+        ZIDE_ICE[${match[2]}]+="${ZIDE_ICE[${match[2]}]:+;}${match[3]#(:|=)}" || \
+        break
+    retval+=1
+done
+
+[[ ${ZIDE_ICE[as]} = program ]] && ZIDE_ICE[as]="command"
+[[ -n ${ZIDE_ICE[on-update-of]} ]] && ZIDE_ICE[subscribe]="${ZIDE_ICE[subscribe]:-${ZIDE_ICE[on-update-of]}}"
+[[ -n ${ZIDE_ICE[pick]} ]] && ZIDE_ICE[pick]="${ZIDE_ICE[pick]//\$ZPFX/${ZPFX%/}}"
+
+return $retval
+
+# vim:ft=zsh:sw=4:sts=4:et
