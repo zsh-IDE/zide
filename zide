@@ -126,7 +126,7 @@ EOF
 
 for mod ( $ide_mods ) {
     .zide-any-to-user-module "${Mods[$mod]}"
-    .zide-setup-module "${reply[1]}" "${reply[2]}" "${reply[2]}" install
+    .zide-setup-module "${reply[1]}" "${reply[2]}" "$mod" components/$mod
 }
 
 # vim:ft=zsh:sw=4:sts=4:et
