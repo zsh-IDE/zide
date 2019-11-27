@@ -125,7 +125,13 @@ EOF
 }
 
 for mod ( $ide_mods ) {
-    .zide-any-to-user-module "${Mods[$mod]}"
+    local modv=${Mods[$mod]}
+    ZIDE_ICE=()
+    if [[ $modv = bin:* ]]; then
+        ZIDE_ICE[from]=gh-r
+        modv=${modv#bin:}
+    fi
+    .zide-any-to-user-module "$modv"
     .zide-setup-module "${reply[1]}" "${reply[2]}" "$mod" components/$mod
 }
 
