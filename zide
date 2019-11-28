@@ -145,6 +145,8 @@ if [[ $action = addfile ]] {
     command sed -i -e "s/\$vimtabs/${noet:-:noet}/g" $name
     command sed -i -e "s/\$license/$license/g" $name
     command sed -i -e "s/\$user_name/${$(git config user.name 2>/dev/null):-Your Name}/g" $name
+
+    print "Created ./$name"
     return 0
 }
 
