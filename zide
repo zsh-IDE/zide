@@ -143,12 +143,25 @@ if [[ $action = addfile ]] {
 EOF
 }
 
-for mod ( $ide_mods ) {
-    local modv=${Mods[$mod]}
-    ZIDE_ICE=()
-    .zide-ice "${(@Q)${(@z)Mods_Ices[$mod]}}"
-    .zide-any-to-user-module "$modv"
-    .zide-setup-module "${reply[1]}" "${reply[2]}" "$mod" components/$mod
+if [[ $action = create ]] {
+    if [[ -n $name ]] {
+        if [[ $PWD != */$name ]]; then
+            command mkdir $name
+            cd -q $name
+        fi
+    }
+
+    if [[ ! -d .git ]]; then
+        command git init
+    fi
+
+    for mod ( $ide_mods ) {
+        local modv=${Mods[$mod]}
+        ZIDE_ICE=()
+        .zide-ice "${(@Q)${(@z)Mods_Ices[$mod]}}"
+        .zide-any-to-user-module "$modv"
+        .zide-setup-module "${reply[1]}" "${reply[2]}" "$mod" components/$mod
+    }
 }
 
 # vim:ft=zsh:sw=4:sts=4:et
