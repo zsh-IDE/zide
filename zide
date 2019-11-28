@@ -133,14 +133,19 @@ for mod ( $ide_mods ) {
 }
 
 if [[ $action = addfile ]] {
-    cat >! "$name" <<EOF
-# -*- mode: sh; sh-indentation: $shift; ${noet:-indent-tabs-mode: nil; }sh-basic-offset: $shift; -*-
+    if [[ -z $name ]] {
+        print Please provide the name of the file to create
+        return 1
+    }
 
-# Copyright ${$(date "+%Y" 2>/dev/null):-2019} ${$(git config user.name 2>/dev/null):-Your Name}
-# License: ${license}
-
-# vim:ft=zsh:sw=${shift}:sts=${shift}${noet:-:et}
-EOF
+    command cp $ZIDE_DIR/templates/new_file.tmpl $name
+    command sed -i -e "s/\$shift/$shift/g" $name
+    command sed -i -e "s/\$year/${$(date +%Y 2>/dev/null):-2019}/g" $name
+    command sed -i -e "s/\$emacstabs/${noet:- indent-tabs-mode: nil; }/g" $name
+    command sed -i -e "s/\$vimtabs/${noet:-:noet}/g" $name
+    command sed -i -e "s/\$license/$license/g" $name
+    command sed -i -e "s/\$user_name/${$(git config user.name 2>/dev/null):-Your Name}/g" $name
+    return 0
 }
 
 if [[ $action = create ]] {
