@@ -24,6 +24,7 @@ if [[ $0 != zide || -n $ZSH_SCRIPT ]]; then
         .zide-store-ices \
         .zide-compile-module \
         .zide-ice \
+        .zide-addfile \
         .zide-setup-module
 fi
 
@@ -133,32 +134,8 @@ for mod ( $ide_mods ) {
 }
 
 if [[ $action = addfile ]] {
-    if [[ -z $name ]] {
-        print Please provide the name of the file to create
-        return 1
-    }
-
-    if [[ -f $name ]] {
-        local confirm
-        if ! read -q 'confirm?File exists. Overwrite? [y/n]'; then
-            print
-            return 1
-        fi
-        print
-        print -r -- Removing ./$name…
-        command rm -f -- $name
-    }
-
-    command cp $ZIDE_DIR/templates/new_file.tmpl $name
-    command sed -i -e "s/\$shift/$shift/g" $name
-    command sed -i -e "s/\$year/${$(date +%Y 2>/dev/null):-2019}/g" $name
-    command sed -i -e "s/\$emacstabs/${noet:- indent-tabs-mode: nil; }/g" $name
-    command sed -i -e "s/\$vimtabs/${noet:-:noet}/g" $name
-    command sed -i -e "s/\$license/$license/g" $name
-    command sed -i -e "s/\$user_name/${$(git config user.name 2>/dev/null):-Your Name}/g" $name
-
-    print "Created ./$name"
-    return 0
+    .zide-addfile "$shift" "$noet" "$license" "$name"
+    return $?
 }
 
 if [[ $action = create ]] {
