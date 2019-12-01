@@ -24,7 +24,10 @@ if [[ $0 != zide || -n $ZSH_SCRIPT ]]; then
         .zide-store-ices \
         .zide-compile-module \
         .zide-ice \
+        .zide-get-mods \
+        .zide-get-mod-ices \
         .zide-addfile \
+        .zide-create \
         .zide-setup-module
 fi
 
@@ -38,7 +41,7 @@ local -a match mbegin mend reply
 
 local action=$1 name
 local -a ide_mods shift noet license
-local -A Mods Mods_Ices ZIDE ZIDE_ICE ZIDE_EXTS
+local -A ZIDE ZIDE_ICE ZIDE_EXTS
 
 ZIDE=(
     c-uname $'\e[35m'
@@ -47,41 +50,6 @@ ZIDE=(
     c-uline $'\e[4m'
     c-rst   $'\e[0m'
 )
-
-Mods=(
-    # Zdharma
-    zshelldoc       "zdharma/zshelldoc"
-    zflai           "zdharma/zflai"
-    zui             "zdharma/zui"
-    zsh-string-lib  "zdharma/zsh-string-lib"
-    # Zsh-ide
-    shu2            "zsh-ide/shu2"
-    # Molovo
-    zunit           "zunit-zsh/zunit"
-    revolver        "molovo/revolver"
-    # Jsks
-    czhttpd         "jsks/czhttpd"
-    # Mvdan
-    shfmt           "mvdan/sh"
-)
-
-Mods_Ices=(
-    # Zdharma
-    zshelldoc       "make'install PREFIX=bin'"
-    zflai           ""
-    zui             ""
-    zsh-string-lib  ""
-    # Zsh-ide
-    shu2            ""
-    # Molovo
-    zunit           "atclone'./build' atpull'%atclone'"
-    revolver        "atclone'./build' atpull'%atclone'"
-    # Jsks
-    czhttpd         "jsks/czhttpd"
-    # Mvdan
-    shfmt           "from'gh-r'"
-)
-
 
 case $action in
     (create)
@@ -122,41 +90,14 @@ i=0; shift=( ${shift/(#m)*/${shift[ ++i % 2 ? 0 : i ]}} )
 i=0; noet=( ${noet/(#m)*/${noet[ ++i % 2 ? 0 : i ]}} )
 i=0; license=( ${license/(#m)*/${license[ ++i % 2 ? 0 : i ]}} )
 
-# Verify that the mods are correct
-local mod
-for mod ( $ide_mods ) {
-    [[ -z ${Mods[(ie)$mod]} ]] && \
-        { print -P "%F{160}Incorrect module given: " \
-            "%F{141}\`%F{120}$mod%F{141}'%F{160}," \
-            "aborting.%f"
-            return 1
-        }
-}
-
 if [[ $action = addfile ]] {
     .zide-addfile "$shift" "$noet" "$license" "$name"
     return $?
 }
 
 if [[ $action = create ]] {
-    if [[ -n $name ]] {
-        if [[ $PWD != */$name ]]; then
-            command mkdir $name
-            cd -q $name
-        fi
-    }
-
-    if [[ ! -d .git ]]; then
-        command git init
-    fi
-
-    for mod ( $ide_mods ) {
-        local modv=${Mods[$mod]}
-        ZIDE_ICE=()
-        .zide-ice "${(@Q)${(@z)Mods_Ices[$mod]}}"
-        .zide-any-to-user-module "$modv"
-        .zide-setup-module "${reply[1]}" "${reply[2]}" "$mod" components/$mod
-    }
+    .zide-create "$name" $ide_mods
+    return $?
 }
 
 # vim:ft=zsh:sw=4:sts=4:et
