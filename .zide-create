@@ -1,0 +1,59 @@
+# -*- mode: sh; sh-indentation: 4; sh-basic-offset: 4; indent-tabs-mode: nil;  -*-
+
+# Copyright 2019 Sebastian Gniazdowski 
+# License: MIT
+
+local name="$1"
+local -a ide_mods
+ide_mods=( ${@[2,-1]} )
+
+local -A Mods
+.zide-get-mods Mods
+
+# Verify that the mods are correct
+local mod
+for mod ( $ide_mods ) {
+    [[ -z ${Mods[(ie)$mod]} ]] && \
+        { print -P "%F{160}Incorrect module given: " \
+            "%F{141}\`%F{120}$mod%F{141}'%F{160}," \
+            "aborting.%f"
+            return 1
+        }
+}
+
+integer creation
+
+if [[ -n $name ]] {
+    if [[ $PWD != */$name ]]; then
+	command mkdir $name
+	cd -q $name
+    fi
+    creation=1
+} else {
+    name=${PWD:t}
+}
+
+if [[ ! -d .git ]]; then
+    command git init
+    creation=1
+fi
+
+local -A Mod_Ices
+.zide-get-mod-ices Mod_Ices
+
+for mod ( $ide_mods ) {
+    local modv=${Mods[$mod]}
+    ZIDE_ICE=()
+    .zide-ice "${(@Q)${(@z)Mod_Ices[$mod]}}"
+    .zide-any-to-user-module "$modv"
+    .zide-setup-module "${reply[1]}" "${reply[2]}" "$mod" components/$mod
+}
+
+if (( creation )) {
+    if [[ -f README.md ]] {
+	command cp $ZIDE_DIR/templates/README.md .
+	command sed -i -e "s/PROJECT/$name/g"
+    }
+}
+
+# vim:ft=zsh:sw=4:sts=4:noet:
