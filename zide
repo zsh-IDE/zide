@@ -66,13 +66,10 @@ case $action in
         ;;
 
     (addfile)
-        # -D - clear out the recognized options
-        # -E - allow mixing of options and non-options
-        # -K - allow default values
-        # -M - allow private arrays for the options
-        #
         # The options are:
-        # --with/--mod/-m/--use – to pass the desired module(s)
+        # -s/--shift – the size of the indentation (mode lines)
+        # -n/--noet – should not use expand-tabs setting
+        # -l/--license – the license to be set in the file
         shift=( -s 4 )
         license=( -l MIT )
         zparseopts -D -E -K -M s:=shift -shift:=shift \
