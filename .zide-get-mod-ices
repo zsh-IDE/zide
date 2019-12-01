@@ -1,0 +1,29 @@
+# -*- mode: sh; sh-indentation: 4; sh-basic-offset: 4; indent-tabs-mode: nil;  -*-
+
+# Copyright 2019 Sebastian Gniazdowski 
+# License: MIT
+
+local __var_name=$1
+
+local -A __Mod_Ices
+
+__Mod_Ices=(
+    # Zdharma
+    zshelldoc       "make'install PREFIX=bin'"
+    zflai           ""
+    zui             ""
+    zsh-string-lib  ""
+    # Zsh-ide
+    shu2            ""
+    # Molovo
+    zunit           "atclone'./build' atpull'%atclone'"
+    revolver        "atclone'./build' atpull'%atclone'"
+    # Jsks
+    czhttpd         "jsks/czhttpd"
+    # Mvdan
+    shfmt           "from'gh-r'"
+)
+
+: ${(@PAA)__var_name::="${(kv)__Mod_Ices[@]}"}
+
+# vim:ft=zsh:sw=4:sts=4:noet:
