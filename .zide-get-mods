@@ -1,0 +1,29 @@
+# -*- mode: sh; sh-indentation: 4; sh-basic-offset: 4; indent-tabs-mode: nil;  -*-
+
+# Copyright 2019 Sebastian Gniazdowski 
+# License: MIT
+
+local __var_name=$1
+
+local -A __Mods
+
+__Mods=(
+    # Zdharma
+    zshelldoc       "zdharma/zshelldoc"
+    zflai           "zdharma/zflai"
+    zui             "zdharma/zui"
+    zsh-string-lib  "zdharma/zsh-string-lib"
+    # Zsh-ide
+    shu2            "zsh-ide/shu2"
+    # Molovo
+    zunit           "zunit-zsh/zunit"
+    revolver        "molovo/revolver"
+    # Jsks
+    czhttpd         "jsks/czhttpd"
+    # Mvdan
+    shfmt           "mvdan/sh"
+)
+
+: ${(@PAA)__var_name::="${(kv)__Mods[@]}"}
+
+# vim:ft=zsh:sw=4:sts=4:noet:
