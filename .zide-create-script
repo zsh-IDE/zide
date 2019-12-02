@@ -12,6 +12,40 @@ local name="$1"
 local -a mods
 mods=( ${@[2,-1]} )
 
-print -rl $mods
+.get-zshelldoc-body() {
+    return 0
+}
+
+.get-zflai-body() {
+    return 0
+}
+
+.get-zui-body() {
+    return 0
+}
+
+.get-zsh-string-lib-body() {
+    return 0
+}
+
+.get-shu2-body() {
+    return 0
+}
+
+.get-zunit-body() {
+    return 0
+}
+
+.get-revolver-body() {
+    return 0
+}
+
+.get-czhttpd-body() {
+    return 0
+}
+
+.get-shfmt-body() {
+    return 0
+}
 
 # vim:ft=zsh:sw=4:sts=4:noet:
