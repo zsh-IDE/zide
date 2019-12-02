@@ -21,7 +21,7 @@ __Mod_Ices=(
     # Jsks
     czhttpd         "jsks/czhttpd"
     # Mvdan
-    shfmt           "from'gh-r'"
+    shfmt           "from'gh-r' mv'shfmt* -> shfmt'"
 )
 
 : ${(@PAA)__var_name::="${(kv)__Mod_Ices[@]}"}
