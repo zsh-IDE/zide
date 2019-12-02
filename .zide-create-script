@@ -1,0 +1,12 @@
+# -*- mode: sh; sh-indentation: 4; sh-basic-offset: 4; indent-tabs-mode: nil;  -*-
+
+# Copyright 2019 Sebastian Gniazdowski 
+# License: MIT
+
+local name="$1"
+local -a mods
+mods=( ${@[2,-1]} )
+
+print -rl $mods
+
+# vim:ft=zsh:sw=4:sts=4:noet:

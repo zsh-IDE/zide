@@ -28,6 +28,7 @@ if [[ $0 != zide || -n $ZSH_SCRIPT ]]; then
         .zide-get-mod-ices \
         .zide-addfile \
         .zide-create \
+        .zide-create-script \
         .zide-setup-module
 fi
 
@@ -93,7 +94,8 @@ if [[ $action = addfile ]] {
 }
 
 if [[ $action = create ]] {
-    .zide-create "$name" $ide_mods
+    .zide-create "$name" $ide_mods || return $?
+    .zide-create-script "$name" $ide_mods
     return $?
 }
 
