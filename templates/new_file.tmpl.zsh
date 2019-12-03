@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 # -*- mode: sh; sh-indentation: $shift; sh-basic-offset: $shift;$emacstabs -*-
 
 # Copyright $year $user_name

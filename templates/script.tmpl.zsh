@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 # -*- mode: sh; sh-indentation: $shift; sh-basic-offset: $shift;$emacstabs -*-
 # vim:ft=zsh:sw=$shift:sts=$shift$vimtabs:
 
