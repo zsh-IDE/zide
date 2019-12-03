@@ -86,7 +86,8 @@ mods=( ${@[2,-1]} )
 .get-preamble-body() {
     local name=$1 normname=$2 subdir=$3
     REPLY="$(<$ZIDE_DIR/templates/script.tmpl.zsh)"
-    REPLY=${REPLY//\$script_name/$normname}
+    REPLY=${REPLY//\$script_name/$name}
+    REPLY=${REPLY//\$script_norm_name/$normname}
     REPLY=${REPLY//\$year/${$(date +%Y 2>/dev/null):-2019}}
     REPLY=${REPLY//\$license/MIT}
     REPLY=${REPLY//\$user_name/${$(git config user.name 2>/dev/null):-Your Name}}

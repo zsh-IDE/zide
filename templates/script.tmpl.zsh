@@ -17,8 +17,8 @@ fi
 emulate -LR zsh
 setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
    
-typeset $script_name_DIR=${0:h}
-fpath+=( $$script_name_DIR )
-path+=( $$script_name_DIR )
+typeset $script_norm_name_DIR=${0:h}
+fpath+=( $$script_norm_name_DIR )
+path+=( $$script_norm_name_DIR )
 
 # Load/setup the components
