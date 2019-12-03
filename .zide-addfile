@@ -1,6 +1,6 @@
 # -*- mode: sh; sh-indentation: 4; sh-basic-offset: 4; indent-tabs-mode: nil;  -*-
 
-# Copyright 2019 Sebastian Gniazdowski 
+# Copyright 2019 Sebastian Gniazdowski
 # License: MIT
 
 local shift="$1" noet="$2" license="$3" name="$4"
