@@ -13,72 +13,72 @@ local -a mods
 mods=( ${@[2,-1]} )
 
 .get-zshelldoc-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="typeset -x PATH=\$PATH:${(q)subdir}/zshelldoc/bin"
+    REPLY="typeset -x PATH=\$PATH:\$${normname}_DIR/${(q)subdir}/zshelldoc/bin"
 
     return 0
 }
 
 .get-zflai-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="source ${(q)subdir}/zflai/zflai.plugin.zsh"
+    REPLY="source \$${normname}_DIR/${(q)subdir}/zflai/zflai.plugin.zsh"
 
     return 0
 }
 
 .get-zui-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="source ${(q)subdir}/zui/zui.plugin.zsh"
+    REPLY="source \$${normname}_DIR/${(q)subdir}/zui/zui.plugin.zsh"
 
     return 0
 }
 
 .get-zsh-string-lib-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="source ${(q)subdir}/zsh-string-lib/zsh-string-lib.lib.zsh"
+    REPLY="source \$${normname}_DIR/${(q)subdir}/zsh-string-lib/zsh-string-lib.lib.zsh"
 
     return 0
 }
 
 .get-shu2-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="source ${(q)subdir}/shu2/lib"
+    REPLY="source \$${normname}_DIR/${(q)subdir}/shu2/lib"
     return 0
 }
 
 .get-zunit-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="typeset -x PATH=\$PATH:${(q)subdir}/zunit"
+    REPLY="typeset -x PATH=\$PATH:\$${normname}_DIR/${(q)subdir}/zunit"
 
     return 0
 }
 
 .get-revolver-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="typeset -x PATH=\$PATH:${(q)subdir}/revolver"
+    REPLY="typeset -x PATH=\$PATH:\$${normname}_DIR/${(q)subdir}/revolver"
 
     return 0
 }
 
 .get-czhttpd-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="typeset -x PATH=\$PATH:${(q)subdir}/czhttpd"
+    REPLY="typeset -x PATH=\$PATH:\$${normname}_DIR/${(q)subdir}/czhttpd"
 
     return 0
 }
 
 .get-shfmt-body() {
-    local subdir=$1
+    local name=$1 normname=$2 subdir=$3
 
-    REPLY="typeset -x PATH=\$PATH:${(q)subdir}/shfmt"
+    REPLY="typeset -x PATH=\$PATH:\$${normname}_DIR/${(q)subdir}/shfmt"
 
     return 0
 }
@@ -106,7 +106,7 @@ print -r $REPLY >! "$name"
 
 local mod
 for mod ( $ide_mods ) {
-    .get-$mod-body $PWD/components
+    .get-$mod-body "$name" "$normname" components
     print -r $REPLY >>! "$name"
 }
 
