@@ -25,6 +25,14 @@ mods=( ${@[2,-1]} )
 
     REPLY="source \$${normname}_DIR/${(q)subdir}/zflai/zflai.plugin.zsh"
 
+    reply+=(
+	'# Zflai' ''
+	'# Learn a table. The timestamp field is automatically populated.'
+	'zflai-ctable  "a-table :: timestamp:integer / message:varchar(288)"'
+	'# Log to the default backend – a file in ~/.cache/zflai'
+	'zflai-log "a-table :: Hello World!"'
+    )
+
     return 0
 }
 
@@ -104,11 +112,19 @@ local normname=${(U)name//[^a-zA-Z0-9]/_}
 .get-preamble-body "$name" "$normname" components
 print -r $REPLY >! "$name"
 
+reply=()
 local mod
 for mod ( $ide_mods ) {
     .get-$mod-body "$name" "$normname" components
     print -r $REPLY >>! "$name"
 }
+
+if (( ${#reply} )) {
+    print -- "\n# Example uses\n" >>! "$name"
+    print -rl "${reply[@]}" >>! "$name"
+}
+
+print >>! "$name"
 
 chmod +x $name
 
