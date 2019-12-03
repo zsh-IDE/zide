@@ -21,7 +21,7 @@ if [[ -f $name ]] {
     command rm -f -- $name
 }
 
-command cp $ZIDE_DIR/templates/new_file.tmpl $name
+command cp $ZIDE_DIR/templates/new_file.tmpl.zsh $name
 command sed -i -e "s/\$shift/$shift/g" $name
 command sed -i -e "s/\$year/${$(date +%Y 2>/dev/null):-2019}/g" $name
 command sed -i -e "s/\$emacstabs/${noet:- indent-tabs-mode: nil; }/g" $name
