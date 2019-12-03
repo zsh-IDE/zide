@@ -1,7 +1,7 @@
 # -*- mode: sh; sh-indentation: $shift; sh-basic-offset: $shift;$emacstabs -*-
 # vim:ft=zsh:sw=$shift:sts=$shift$vimtabs:
 
-# Copyright $year $user_name 
+# Copyright $year $user_name
 # License: $license
 
 # Run as script? ZSH_SCRIPT is a Zsh 5.3 addition
@@ -16,7 +16,7 @@ fi
 
 emulate -LR zsh
 setopt extendedglob warncreateglobal typesetsilent noshortloops rcquotes
-    
+   
 typeset $script_name_DIR=${0:h}
 fpath+=( $$script_name_DIR )
 path+=( $$script_name_DIR )
