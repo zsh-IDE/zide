@@ -22,12 +22,12 @@ if [[ -f $name ]] {
 }
 
 command cp $ZIDE_DIR/templates/new_file.tmpl.zsh $name
-command sed -i -e "s/\$shift/$shift/g" $name
 command sed -i -e "s/\$year/${$(date +%Y 2>/dev/null):-2019}/g" $name
-command sed -i -e "s/\$emacstabs/${noet:- indent-tabs-mode: nil; }/g" $name
-command sed -i -e "s/\$vimtabs/${noet:-:noet}/g" $name
 command sed -i -e "s/\$license/$license/g" $name
 command sed -i -e "s/\$user_name/${$(git config user.name 2>/dev/null):-Your Name}/g" $name
+command sed -i -e "s/\$shift/$shift/g" $name
+command sed -i -e "s/\$emacstabs/${noet:- indent-tabs-mode: nil; }/g" $name
+command sed -i -e "s/\$vimtabs/${noet:-:noet}/g" $name
 
 print "Created ./$name"
 return 0
