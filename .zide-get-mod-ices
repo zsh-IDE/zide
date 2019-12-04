@@ -16,8 +16,8 @@ __Mod_Ices=(
     # Zsh-ide
     shu2            ""
     # Molovo
-    zunit           "atclone'./build' atpull'%atclone'"
-    revolver        "atclone'./build' atpull'%atclone'"
+    zunit           "atclone'./build.zsh' atpull'%atclone'"
+    revolver        ""
     # Jsks
     czhttpd         "jsks/czhttpd"
     # Mvdan
