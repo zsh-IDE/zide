@@ -13,10 +13,10 @@ __Mods=(
     zflai           "zdharma/zflai"
     zui             "zdharma/zui"
     zsh-string-lib  "zdharma/zsh-string-lib"
-    # Zsh-ide
-    shu2            "zsh-ide/shu2"
     # Modernish
     modernish	    "modernish/modernish"
+    # Zsh-ide
+    shu2            "zsh-ide/shu2"
     # Molovo
     zunit           "zunit-zsh/zunit"
     revolver        "molovo/revolver"

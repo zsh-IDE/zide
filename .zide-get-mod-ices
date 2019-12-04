@@ -13,8 +13,6 @@ __Mod_Ices=(
     zflai           ""
     zui             ""
     zsh-string-lib  ""
-    # Zsh-ide
-    shu2            ""
     # Modernish
     modernish	    'atclone''builtin cd -q ..
 	command mkdir modernish-bin
@@ -22,6 +20,8 @@ __Mod_Ices=(
 	    >! ./zide-install-modernish.zsh
 	chmod +x zide-install-modernish.zsh
 	./zide-install-modernish.zsh'''
+    # Zsh-ide
+    shu2            ""
     # Molovo
     zunit           "atclone'./build.zsh' atpull'%atclone'"
     revolver        ""
