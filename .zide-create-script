@@ -49,6 +49,45 @@ mods=( ${@[2,-1]} )
 
     REPLY="source \$${normname}_DIR/${(q)subdir}/zsh-string-lib/zsh-string-lib.lib.zsh"
 
+    reply+=(
+	''
+	'# Zsh-string-lib'
+	''
+	'# Prepare a simple JSON buffer'
+	'typeset json=''{
+    "profiles":{
+	"empty": {},
+        "default":{
+            "as":"program"
+        },
+        "bgn":{
+            "as":"null",
+            "sbin":"fzy;contrib/fzy-*"
+        }
+    }
+}'''
+	''
+	'# Parse the buffer'
+	'local -A Strings; @str-parse-json "$json" "profiles" Strings'
+	''
+	'# Get the `bgn'' profile'
+	'pos=${${(@Q)${(@z)Strings[2/1]}}[(I)bgn]}'
+	'if (( pos )) {'
+	  '    local -A fields'
+	  '    fields=( "${(@Q)${(@z)Strings[3/$(( (pos+1) / 2 ))]}}" )'
+	  '    # Use the `fields'' hash holding the values of the `bgn'' object'
+	  '    # …'
+	  '    print -rl -- "${(kv)fields[@]}"'
+	'}'
+    )
+    return 0
+}
+
+.get-modernish-body() {
+    local name=$1 normname=$2 subdir=$3
+
+    REPLY="typeset -x PATH=\$PATH:\$${normname}_DIR/${(q)subdir}/modernish-bin/bin"
+
     return 0
 }
 
