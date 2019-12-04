@@ -71,7 +71,7 @@ mods=( ${@[2,-1]} )
 	'local -A Strings; @str-parse-json "$json" "profiles" Strings'
 	''
 	'# Get the `bgn'' profile'
-	'pos=${${(@Q)${(@z)Strings[2/1]}}[(I)bgn]}'
+	'integer pos=${${(@Q)${(@z)Strings[2/1]}}[(I)bgn]}'
 	'if (( pos )) {'
 	  '    local -A fields'
 	  '    fields=( "${(@Q)${(@z)Strings[3/$(( (pos+1) / 2 ))]}}" )'
