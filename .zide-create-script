@@ -114,7 +114,7 @@ print -r $REPLY >! "$name"
 
 reply=()
 local mod
-for mod ( $ide_mods ) {
+for mod ( $mods ) {
     .get-$mod-body "$name" "$normname" components
     print -r $REPLY >>! "$name"
 }
