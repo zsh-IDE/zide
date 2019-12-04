@@ -21,6 +21,8 @@ autoload -Uz \
     .zide-compute-ice \
     .zide-store-ices \
     .zide-compile-module \
+    .zide-create \
+    .zide-create-script \
     .zide-ice \
     .zide-setup-module
 
