@@ -15,8 +15,7 @@ __Mod_Ices=(
     zsh-string-lib  ""
     # Modernish
     modernish	    'atclone''builtin cd -q ..
-	command mkdir modernish-bin
-	print "#!/usr/bin/env zsh\\n./modernish/install.sh -n -s zsh -f -d ../modernish-bin" \
+	print "#!/usr/bin/env zsh\\nmkdir -p modernish-bin\\n./modernish/install.sh -n -s zsh -f -d ../modernish-bin" \
 	    >! ./zide-install-modernish.zsh
 	chmod +x zide-install-modernish.zsh
 	./zide-install-modernish.zsh'''
