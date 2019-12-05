@@ -8,7 +8,8 @@ zide_ef=( ${(k)functions} )
 trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef" EXIT
 trap "unset -f -- \"\${(k)functions[@]:|zide_ef}\" &>/dev/null; unset zide_ef; return 1" INT
 
-local name="$1"
+local name_and_path=$1
+local pth=${name_and_path:h} name=${name_and_path:t}
 local -a mods
 mods=( ${@[2,-1]} )
 

@@ -3,7 +3,8 @@
 # Copyright 2019 Sebastian Gniazdowski
 # License: MIT
 
-local name="$1"
+local name_and_path=$1
+local pth=${name_and_path:h} name=${name_and_path:t}
 local -a ide_mods
 ide_mods=( ${@[2,-1]} )
 
@@ -25,8 +26,8 @@ integer creation
 
 if [[ -n $name ]] {
     if [[ $PWD != */$name ]]; then
-	command mkdir $name
-	cd -q $name
+	command mkdir $pth/$name
+	cd -q $pth/$name
     fi
     creation=1
 } else {
