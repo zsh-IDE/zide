@@ -5,6 +5,9 @@
 # Copyright $year $user_name
 # License: $license
 
+# Type agnostic object – can be run as script or as a function,
+# and also sourced.
+
 # Run as script? ZSH_SCRIPT is a Zsh 5.3 addition
 if [[ $0 != "$script_name" || -n $ZSH_SCRIPT ]]; then
     # Handle $0 according to the Zsh Plugin Standard:
