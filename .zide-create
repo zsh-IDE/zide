@@ -51,9 +51,9 @@ for mod ( $ide_mods ) {
 }
 
 if (( creation )) {
-    if [[ -f README.md ]] {
-	command cp $ZIDE_DIR/templates/README.md .
-	command sed -i -e "s/PROJECT/$name/g"
+    if [[ ! -f README.md ]] {
+	command cp $ZIDE_DIR/templates/README.tmpl.md ./README.md
+	command sed -i -e "s/PROJECT_NAME/$name/g" ./README.md
     }
 }
 
